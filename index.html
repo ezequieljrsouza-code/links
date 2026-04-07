@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Links | Ezequiel</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #1a1a1a;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #ffd100;
+            display: inline-block;
+        }
+
+        .status {
+            margin: 0 auto 20px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status.syncing {
+            background: #e8f1ff;
+            color: #0b5ed7;
+            border: 1px solid #cfe2ff;
+        }
+
+        .status.online {
+            background: #e8f7ec;
+            color: #146c43;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.offline {
+            background: #fff4e5;
+            color: #b26a00;
+            border: 1px solid #ffd8a8;
+        }
+
+        .status.warning {
+            background: #fff8e1;
+            color: #8d6e00;
+            border: 1px solid #ffecb5;
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-add {
+            padding: 10px 20px;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-add:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .link-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            background: #fff;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .link-card:hover {
+            border-color: #0056b3;
+            background-color: #f0f7ff;
+            transform: scale(1.01);
+        }
+
+        .btn-reset {
+            margin-top: 20px;
+            background: none;
+            border: none;
+            color: #999;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        @media (max-width: 640px) {
+            .form-group {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-add {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Painel de Links</h2>
+
+        <div id="statusSync" class="status syncing">Iniciando sincronização...</div>
+        
+        <div class="form-group">
+            <input type="text" id="nomeLink" placeholder="Nome (Ex: FOS)">
+            <input type="text" id="urlLink" placeholder="URL (Link completo)">
+            <button class="btn-add" id="btnSalvar" onclick="adicionarLink()">Salvar</button>
+        </div>
+
+        <ul id="listaLinks"></ul>
+
+        <button class="btn-reset" onclick="resetarLinks()">Restaurar lista padrão</button>
+    </div>
+
+    <script>
+        const FIREBASE_URL = "https://checklistelinks-default-rtdb.firebaseio.com";
+        const FIREBASE_PATH = "/minhasRotas.json";
+        const LOCAL_KEY = "minhasRotas";
+
+        const linksPadrao = [
+            { nome: "Lista de HU's 2.0", url: "https://tms.adminml.com/fos-expedition/reports/pallets-report?flow=sales" },
+            { nome: "Painel de Pesquisa SEM ID", url: "https://pesquisasemid.pages.dev" },
+            { nome: "FOS | Consulta", url: "https://tms.adminml.com/fos/shipment/details/44357785992" },
+            { nome: "Separação", url: "https://envios.adminml.com/logistics/sorting/monitoring" },
+            { nome: "Solução de problemas", url: "https://envios.adminml.com/logistics/problem-solving/" },
+            { nome: "HOME ZONAS", url: "https://envios.adminml.com/logistics/service-center" },
+            { nome: "Carrinhos", url: "https://envios.adminml.com/logistics/sorting/containers" },
+            { nome: "FOS | Etiquetagem", url: "https://tms.adminml.com/fos/labels/authorize" },
+            { nome: "FORMS HUS 2.0 DEVOLUÇÃO", url: "https://docs.google.com/forms/d/e/1FAIpQLScQEsHp4NbmdyJLYWHwsKSClooyxOolLCDiTPlaJrL7UUvy4Q/viewform" },
+            { nome: "BASE PACOTES LOCALIZADOS", url: "https://docs.google.com/spreadsheets/d/1iYoqXd4f8igS-sSrWSaUyWshYr9GUt1_B_X0iHoJK68/edit" },
+            { nome: "Inventário", url: "https://envios.adminml.com/logistics/inventory/" },
+            { nome: "FORMS XPT DEVOLUÇÃO", url: "https://docs.google.com/forms/d/e/1FAIpQLSd6xmos33usGvk_O3yIMzA-lSnQgsA5g3gkgwYmegSHy3IPQA/viewform" },
+            { nome: "CHECK DE PACOTES BOIANDO", url: "https://lookerstudio.google.com/u/0/reporting/7c6de6d9-de3d-46d6-86a7-14da7fd9448c/page/p_19tm4x6o1d" },
+            { nome: "FORMS PIRAMIDE", url: "https://forms.office.com/Pages/ResponsePage.aspx?id=-P6ZzdMcKkqb3xVTEYHWXuRatd0_jdJCi3wmRBRctV9UMThETDdUSUkzUjlNSThCMExDODZMOUszVS4u" },
+            { nome: "Gerar Placas", url: "https://gerarplacashu.pages.dev/" },
+            { nome: "HUS MONTADAS 1.0", url: "https://envios.adminml.com/logistics/node/return-to-origin" },
+            { nome: "GESTÃO DE PACOTES", url: "https://envios.adminml.com/logistics/package-management" },
+            { nome: "Monitoramento terrestre", url: "https://envios.adminml.com/logistics/line-haul/monitoring/routes" },
+            { nome: "QRS DAS SACAS", url: "https://drive.google.com/file/d/1MULJkxeefHgRpbkI01Uh-QnhXc9m86mD/view" },
+            { nome: "CONTROLE DE DEVOLUÇÃO - SPA1", url: "https://docs.google.com/spreadsheets/d/1-iRRYxUvQw-JOfkNhhGID9StejIoS4sb706gQuR3xXw/edit" },
+            { nome: "LISTA DE HUS 1.0", url: "https://tms.adminml.com/fos-assembly-reports/hu-list/sales" }
+        ];
+
+        function setStatus(texto, tipo = "syncing") {
+            const status = document.getElementById("statusSync");
+            status.className = `status ${tipo}`;
+            status.textContent = texto;
+        }
+
+        function getLinksLocais() {
+            try {
+                const dados = JSON.parse(localStorage.getItem(LOCAL_KEY));
+                return Array.isArray(dados) && dados.length ? dados : [...linksPadrao];
+            } catch {
+                return [...linksPadrao];
+            }
+        }
+
+        function salvarLinksLocais(links) {
+            localStorage.setItem(LOCAL_KEY, JSON.stringify(links));
+        }
+
+        function normalizarUrl(url) {
+            let urlFinal = url.trim();
+            if (!/^https?:\/\//i.test(urlFinal)) {
+                urlFinal = "https://" + urlFinal;
+            }
+
+            try {
+                return new URL(urlFinal).href;
+            } catch {
+                return null;
+            }
+        }
+
+        function removerDuplicados(lista) {
+            const mapa = new Map();
+
+            lista.forEach(item => {
+                if (!item?.nome || !item?.url) return;
+                const chave = `${item.nome.trim().toLowerCase()}|${item.url.trim().toLowerCase()}`;
+                if (!mapa.has(chave)) {
+                    mapa.set(chave, {
+                        nome: item.nome.trim(),
+                        url: item.url.trim()
+                    });
+                }
+            });
+
+            return Array.from(mapa.values());
+        }
+
+        function renderizarLinks(links) {
+            const lista = document.getElementById("listaLinks");
+            lista.innerHTML = "";
+
+            links.forEach(link => {
+                const li = document.createElement("li");
+                const a = document.createElement("a");
+                const spanNome = document.createElement("span");
+                const spanSeta = document.createElement("span");
+
+                a.href = link.url;
+                a.className = "link-card";
+                a.target = "_blank";
+                a.rel = "noopener noreferrer";
+
+                spanNome.textContent = link.nome;
+                spanSeta.textContent = "→";
+
+                a.appendChild(spanNome);
+                a.appendChild(spanSeta);
+                li.appendChild(a);
+                lista.appendChild(li);
+            });
+        }
+
+        async function buscarLinksNuvem() {
+            const resposta = await fetch(`${FIREBASE_URL}${FIREBASE_PATH}?t=${Date.now()}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+
+            if (!resposta.ok) {
+                throw new Error("Falha ao buscar dados do Firebase.");
+            }
+
+            return await resposta.json();
+        }
+
+        async function salvarLinksNuvem(links) {
+            const resposta = await fetch(`${FIREBASE_URL}${FIREBASE_PATH}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(links)
+            });
+
+            if (!resposta.ok) {
+                throw new Error("Falha ao salvar dados no Firebase.");
+            }
+
+            return await resposta.json();
+        }
+
+        async function carregarLinks() {
+            // 1) Exibe cache local instantaneamente
+            const linksLocais = getLinksLocais();
+            renderizarLinks(linksLocais);
+
+            // 2) Busca Firebase sempre como fonte de verdade
+            setStatus("Consultando backup na nuvem...", "syncing");
+
+            if (!navigator.onLine) {
+                setStatus("Sem internet. Exibindo dados locais.", "offline");
+                return;
+            }
+
+            try {
+                const linksNuvem = await buscarLinksNuvem();
+
+                // 3) Se Firebase tiver dados, usa eles e atualiza o cache local
+                if (Array.isArray(linksNuvem) && linksNuvem.length > 0) {
+                    const listaFinal = removerDuplicados(linksNuvem);
+                    salvarLinksLocais(listaFinal);
+                    renderizarLinks(listaFinal);
+                    setStatus("Dados carregados da nuvem com sucesso.", "online");
+                    return;
+                }
+
+                // 4) Se Firebase estiver vazio, sobe os dados locais/padrão
+                const baseInicial = removerDuplicados(linksLocais.length ? linksLocais : linksPadrao);
+                await salvarLinksNuvem(baseInicial);
+                salvarLinksLocais(baseInicial);
+                renderizarLinks(baseInicial);
+                setStatus("Firebase vazio. Dados locais/padrão enviados para a nuvem.", "warning");
+
+            } catch (erro) {
+                console.error(erro);
+                // 5) Se Firebase offline, mantém modo local com aviso visual
+                setStatus("Firebase indisponível. Modo local ativo.", "offline");
+            }
+        }
+
+        async function adicionarLink() {
+            const botao = document.getElementById("btnSalvar");
+            const nomeInput = document.getElementById("nomeLink");
+            const urlInput = document.getElementById("urlLink");
+
+            const nome = nomeInput.value.trim();
+            const urlNormalizada = normalizarUrl(urlInput.value);
+
+            if (!nome || !urlInput.value.trim()) {
+                alert("Preencha ambos os campos!");
+                return;
+            }
+
+            if (!urlNormalizada) {
+                alert("Digite uma URL válida.");
+                return;
+            }
+
+            const linksAtuais = getLinksLocais();
+            const linksAtualizados = removerDuplicados([
+                ...linksAtuais,
+                { nome, url: urlNormalizada }
+            ]);
+
+            botao.disabled = true;
+            setStatus("Salvando link... priorizando backup na nuvem.", "syncing");
+
+            try {
+                // Prioriza primeiro a nuvem
+                if (!navigator.onLine) {
+                    throw new Error("Sem conexão.");
+                }
+
+                await salvarLinksNuvem(linksAtualizados);
+                salvarLinksLocais(linksAtualizados);
+                renderizarLinks(linksAtualizados);
+
+                nomeInput.value = "";
+                urlInput.value = "";
+                setStatus("Link salvo na nuvem e sincronizado localmente.", "online");
+
+            } catch (erro) {
+                console.error(erro);
+
+                // Fallback local com aviso visual
+                salvarLinksLocais(linksAtualizados);
+                renderizarLinks(linksAtualizados);
+
+                nomeInput.value = "";
+                urlInput.value = "";
+                setStatus("Sem acesso ao Firebase. Link salvo apenas no modo local.", "offline");
+            } finally {
+                botao.disabled = false;
+            }
+        }
+
+        async function resetarLinks() {
+            const confirmar = confirm("Deseja restaurar a lista original e apagar os que você adicionou?");
+            if (!confirmar) return;
+
+            setStatus("Restaurando lista padrão...", "syncing");
+
+            try {
+                if (!navigator.onLine) {
+                    throw new Error("Sem conexão.");
+                }
+
+                await salvarLinksNuvem(linksPadrao);
+                salvarLinksLocais(linksPadrao);
+                renderizarLinks(linksPadrao);
+                setStatus("Lista padrão restaurada e sincronizada com a nuvem.", "online");
+
+            } catch (erro) {
+                console.error(erro);
+                salvarLinksLocais(linksPadrao);
+                renderizarLinks(linksPadrao);
+                setStatus("Firebase indisponível. Lista padrão restaurada apenas localmente.", "offline");
+            }
+        }
+
+        window.addEventListener("online", () => {
+            setStatus("Conexão restabelecida. Sincronizando com a nuvem...", "syncing");
+            carregarLinks();
+        });
+
+        window.addEventListener("offline", () => {
+            setStatus("Você está offline. Modo local ativo.", "offline");
+        });
+
+        window.onload = carregarLinks;
+    </script>
+</body>
+</html>
