@@ -5,428 +5,287 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Links | Ezequiel</title>
     <style>
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 40px 20px;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .container {
-            width: 100%;
-            max-width: 700px;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
+        :root {
+            --bg: #f0f2f5; --surface: #ffffff; --border: #e0e0e0; --text: #1a1a1a; --muted: #888;
+            --accent: #0056b3; --accent-light: #f0f7ff; --input-bg: #f8f9fa;
+            --btn-danger: #c0392b; --drag-over: #e8f7ec;
+            --status-sync-bg:#e8f1ff;--status-sync-c:#0b5ed7;--status-sync-b:#cfe2ff;
+            --status-on-bg:#e8f7ec;--status-on-c:#146c43;--status-on-b:#c3e6cb;
+            --status-off-bg:#fff4e5;--status-off-c:#b26a00;--status-off-b:#ffd8a8;
+            --status-warn-bg:#fff8e1;--status-warn-c:#8d6e00;--status-warn-b:#ffecb5;
         }
-
-        h2 {
-            color: #1a1a1a;
-            margin-bottom: 14px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #ffd100;
-            display: inline-block;
+        body.dark {
+            --bg:#111;--surface:#1c1c1e;--border:#333;--text:#f0f0f0;--muted:#777;
+            --accent:#4a9eed;--accent-light:#0d2340;--input-bg:#2a2a2e;
+            --btn-danger:#e74c3c;--drag-over:#0d2b1a;
+            --status-sync-bg:#0d2340;--status-sync-c:#7ec8f8;--status-sync-b:#1a3a5c;
+            --status-on-bg:#0d2b1a;--status-on-c:#6fcf97;--status-on-b:#1a5c35;
+            --status-off-bg:#2b1e00;--status-off-c:#f9c74f;--status-off-b:#5c4200;
+            --status-warn-bg:#2b2500;--status-warn-c:#f9e04b;--status-warn-b:#5c4e00;
         }
-
-        .status {
-            margin: 0 auto 20px;
-            padding: 12px 14px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .status.syncing {
-            background: #e8f1ff;
-            color: #0b5ed7;
-            border: 1px solid #cfe2ff;
-        }
-
-        .status.online {
-            background: #e8f7ec;
-            color: #146c43;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status.offline {
-            background: #fff4e5;
-            color: #b26a00;
-            border: 1px solid #ffd8a8;
-        }
-
-        .status.warning {
-            background: #fff8e1;
-            color: #8d6e00;
-            border: 1px solid #ffecb5;
-        }
-
-        .form-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 10px;
-            margin-bottom: 25px;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        input {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .btn-add {
-            padding: 10px 20px;
-            background-color: #0056b3;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-add:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .link-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-decoration: none;
-            color: #333;
-            background: #fff;
-            padding: 16px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .link-card:hover {
-            border-color: #0056b3;
-            background-color: #f0f7ff;
-            transform: scale(1.01);
-        }
-
-        .btn-reset {
-            margin-top: 20px;
-            background: none;
-            border: none;
-            color: #999;
-            text-decoration: underline;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        @media (max-width: 640px) {
-            .form-group {
-                grid-template-columns: 1fr;
-            }
-
-            .btn-add {
-                width: 100%;
-            }
-        }
+        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif;margin:0;padding:40px 20px;background-color:var(--bg);display:flex;justify-content:center;transition:background .2s; }
+        .container { width:100%;max-width:700px;background:var(--surface);padding:28px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1);transition:background .2s; }
+        .header { display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:12px;border-bottom:3px solid #ffd100; }
+        h2 { color:var(--text);font-size:18px;font-weight:600; }
+        .btn-theme { background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:13px;transition:all .15s; }
+        .btn-theme:hover { border-color:var(--accent);color:var(--accent); }
+        .status { margin:0 0 18px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;text-align:center; }
+        .status.syncing{background:var(--status-sync-bg);color:var(--status-sync-c);border:1px solid var(--status-sync-b);}
+        .status.online {background:var(--status-on-bg);color:var(--status-on-c);border:1px solid var(--status-on-b);}
+        .status.offline{background:var(--status-off-bg);color:var(--status-off-c);border:1px solid var(--status-off-b);}
+        .status.warning{background:var(--status-warn-bg);color:var(--status-warn-c);border:1px solid var(--status-warn-b);}
+        .form-group { display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-bottom:20px;background:var(--input-bg);padding:14px;border-radius:8px;border:1px solid var(--border); }
+        input { padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;background:var(--surface);color:var(--text);width:100%; }
+        input:focus { outline:none;border-color:var(--accent); }
+        .btn-add { padding:10px 18px;background-color:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;white-space:nowrap; }
+        .btn-add:disabled { opacity:.7;cursor:not-allowed; }
+        ul { list-style:none;padding:0;display:flex;flex-direction:column;gap:8px; }
+        .link-item { display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;transition:border-color .2s; }
+        .link-item:hover { border-color:var(--accent); }
+        .link-item.drag-over { border-color:#1d9e75;background:var(--drag-over); }
+        .drag-handle { cursor:grab;color:var(--muted);padding:14px 4px 14px 10px;font-size:13px;user-select:none;flex-shrink:0; }
+        .drag-handle:active { cursor:grabbing; }
+        .link-body { flex:1;min-width:0;display:flex;flex-direction:column; }
+        .link-row { display:flex;align-items:center; }
+        .link-card { flex:1;display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:var(--text);padding:14px 8px 14px 0;font-weight:500;font-size:14px;min-width:0; }
+        .link-card span:first-child { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+        .link-card span:last-child  { color:var(--muted);flex-shrink:0;margin-left:8px;font-size:13px; }
+        .link-actions { display:flex;align-items:center;gap:2px;padding-right:8px;opacity:0;transition:opacity .15s; }
+        .link-item:hover .link-actions { opacity:1; }
+        .action-btn { background:none;border:none;cursor:pointer;padding:5px 7px;border-radius:5px;font-size:11px;font-weight:500;color:var(--muted);transition:all .15s; }
+        .action-btn:hover { background:var(--input-bg); }
+        .action-btn.edit:hover { color:var(--accent); }
+        .action-btn.del:hover  { color:var(--btn-danger); }
+        .edit-row { display:none;padding:8px 12px 10px;border-top:1px solid var(--border);gap:8px;align-items:center;background:var(--input-bg);border-radius:0 0 8px 8px; }
+        .edit-row.open { display:flex; }
+        .edit-row input { flex:1;padding:7px 10px;font-size:13px; }
+        .edit-save { background:var(--accent);color:#fff;border:none;border-radius:5px;padding:7px 12px;font-size:12px;font-weight:500;cursor:pointer; }
+        .edit-cancel { background:none;border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:7px 10px;font-size:12px;cursor:pointer; }
+        .btn-reset { margin-top:20px;background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:12px;display:block;margin-left:auto;margin-right:auto; }
+        @media(max-width:640px){.form-group{grid-template-columns:1fr}.btn-add{width:100%}.link-actions{opacity:1}}
     </style>
 </head>
 <body>
-
-    <div class="container">
+<div class="container">
+    <div class="header">
         <h2>Painel de Links</h2>
-
-        <div id="statusSync" class="status syncing">Iniciando sincronização...</div>
-        
-        <div class="form-group">
-            <input type="text" id="nomeLink" placeholder="Nome (Ex: FOS)">
-            <input type="text" id="urlLink" placeholder="URL (Link completo)">
-            <button class="btn-add" id="btnSalvar" onclick="adicionarLink()">Salvar</button>
-        </div>
-
-        <ul id="listaLinks"></ul>
-
-        <button class="btn-reset" onclick="resetarLinks()">Restaurar lista padrão</button>
+        <button class="btn-theme" id="btnTheme" onclick="toggleTheme()">🌙 Escuro</button>
     </div>
+    <div id="statusSync" class="status syncing">Iniciando sincronização...</div>
+    <div class="form-group">
+        <input type="text" id="nomeLink" placeholder="Nome (Ex: FOS)">
+        <input type="text" id="urlLink" placeholder="URL (Link completo)">
+        <button class="btn-add" id="btnSalvar" onclick="adicionarLink()">Salvar</button>
+    </div>
+    <ul id="listaLinks"></ul>
+    <button class="btn-reset" onclick="resetarLinks()">Restaurar lista padrão</button>
+</div>
 
-    <script>
-        const FIREBASE_URL = "https://checklistelinks-default-rtdb.firebaseio.com";
-        const FIREBASE_PATH = "/minhasRotas.json";
-        const LOCAL_KEY = "minhasRotas";
+<script>
+const FIREBASE_URL="https://checklistelinks-default-rtdb.firebaseio.com";
+const FIREBASE_PATH="/minhasRotas.json";
+const LOCAL_KEY="minhasRotas";
+const THEME_KEY="painelTheme";
 
-        const linksPadrao = [
-            { nome: "Lista de HU's 2.0", url: "https://tms.adminml.com/fos-expedition/reports/pallets-report?flow=sales" },
-            { nome: "Painel de Pesquisa SEM ID", url: "https://pesquisasemid.pages.dev" },
-            { nome: "FOS | Consulta", url: "https://tms.adminml.com/fos/shipment/details/44357785992" },
-            { nome: "Separação", url: "https://envios.adminml.com/logistics/sorting/monitoring" },
-            { nome: "Solução de problemas", url: "https://envios.adminml.com/logistics/problem-solving/" },
-            { nome: "HOME ZONAS", url: "https://envios.adminml.com/logistics/service-center" },
-            { nome: "Carrinhos", url: "https://envios.adminml.com/logistics/sorting/containers" },
-            { nome: "FOS | Etiquetagem", url: "https://tms.adminml.com/fos/labels/authorize" },
-            { nome: "FORMS HUS 2.0 DEVOLUÇÃO", url: "https://docs.google.com/forms/d/e/1FAIpQLScQEsHp4NbmdyJLYWHwsKSClooyxOolLCDiTPlaJrL7UUvy4Q/viewform" },
-            { nome: "BASE PACOTES LOCALIZADOS", url: "https://docs.google.com/spreadsheets/d/1iYoqXd4f8igS-sSrWSaUyWshYr9GUt1_B_X0iHoJK68/edit" },
-            { nome: "Inventário", url: "https://envios.adminml.com/logistics/inventory/" },
-            { nome: "FORMS XPT DEVOLUÇÃO", url: "https://docs.google.com/forms/d/e/1FAIpQLSd6xmos33usGvk_O3yIMzA-lSnQgsA5g3gkgwYmegSHy3IPQA/viewform" },
-            { nome: "CHECK DE PACOTES BOIANDO", url: "https://lookerstudio.google.com/u/0/reporting/7c6de6d9-de3d-46d6-86a7-14da7fd9448c/page/p_19tm4x6o1d" },
-            { nome: "FORMS PIRAMIDE", url: "https://forms.office.com/Pages/ResponsePage.aspx?id=-P6ZzdMcKkqb3xVTEYHWXuRatd0_jdJCi3wmRBRctV9UMThETDdUSUkzUjlNSThCMExDODZMOUszVS4u" },
-            { nome: "Gerar Placas", url: "https://gerarplacashu.pages.dev/" },
-            { nome: "HUS MONTADAS 1.0", url: "https://envios.adminml.com/logistics/node/return-to-origin" },
-            { nome: "GESTÃO DE PACOTES", url: "https://envios.adminml.com/logistics/package-management" },
-            { nome: "Monitoramento terrestre", url: "https://envios.adminml.com/logistics/line-haul/monitoring/routes" },
-            { nome: "QRS DAS SACAS", url: "https://drive.google.com/file/d/1MULJkxeefHgRpbkI01Uh-QnhXc9m86mD/view" },
-            { nome: "CONTROLE DE DEVOLUÇÃO - SPA1", url: "https://docs.google.com/spreadsheets/d/1-iRRYxUvQw-JOfkNhhGID9StejIoS4sb706gQuR3xXw/edit" },
-            { nome: "LISTA DE HUS 1.0", url: "https://tms.adminml.com/fos-assembly-reports/hu-list/sales" }
-        ];
+const linksPadrao=[
+    {nome:"Lista de HU's 2.0",url:"https://tms.adminml.com/fos-expedition/reports/pallets-report?flow=sales"},
+    {nome:"Painel de Pesquisa SEM ID",url:"https://pesquisasemid.pages.dev"},
+    {nome:"FOS | Consulta",url:"https://tms.adminml.com/fos/shipment/details/44357785992"},
+    {nome:"Separação",url:"https://envios.adminml.com/logistics/sorting/monitoring"},
+    {nome:"Solução de problemas",url:"https://envios.adminml.com/logistics/problem-solving/"},
+    {nome:"HOME ZONAS",url:"https://envios.adminml.com/logistics/service-center"},
+    {nome:"Carrinhos",url:"https://envios.adminml.com/logistics/sorting/containers"},
+    {nome:"FOS | Etiquetagem",url:"https://tms.adminml.com/fos/labels/authorize"},
+    {nome:"FORMS HUS 2.0 DEVOLUÇÃO",url:"https://docs.google.com/forms/d/e/1FAIpQLScQEsHp4NbmdyJLYWHwsKSClooyxOolLCDiTPlaJrL7UUvy4Q/viewform"},
+    {nome:"BASE PACOTES LOCALIZADOS",url:"https://docs.google.com/spreadsheets/d/1iYoqXd4f8igS-sSrWSaUyWshYr9GUt1_B_X0iHoJK68/edit"},
+    {nome:"Inventário",url:"https://envios.adminml.com/logistics/inventory/"},
+    {nome:"FORMS XPT DEVOLUÇÃO",url:"https://docs.google.com/forms/d/e/1FAIpQLSd6xmos33usGvk_O3yIMzA-lSnQgsA5g3gkgwYmegSHy3IPQA/viewform"},
+    {nome:"CHECK DE PACOTES BOIANDO",url:"https://lookerstudio.google.com/u/0/reporting/7c6de6d9-de3d-46d6-86a7-14da7fd9448c/page/p_19tm4x6o1d"},
+    {nome:"FORMS PIRAMIDE",url:"https://forms.office.com/Pages/ResponsePage.aspx?id=-P6ZzdMcKkqb3xVTEYHWXuRatd0_jdJCi3wmRBRctV9UMThETDdUSUkzUjlNSThCMExDODZMOUszVS4u"},
+    {nome:"Gerar Placas",url:"https://gerarplacashu.pages.dev/"},
+    {nome:"HUS MONTADAS 1.0",url:"https://envios.adminml.com/logistics/node/return-to-origin"},
+    {nome:"GESTÃO DE PACOTES",url:"https://envios.adminml.com/logistics/package-management"},
+    {nome:"Monitoramento terrestre",url:"https://envios.adminml.com/logistics/line-haul/monitoring/routes"},
+    {nome:"QRS DAS SACAS",url:"https://drive.google.com/file/d/1MULJkxeefHgRpbkI01Uh-QnhXc9m86mD/view"},
+    {nome:"CONTROLE DE DEVOLUÇÃO - SPA1",url:"https://docs.google.com/spreadsheets/d/1-iRRYxUvQw-JOfkNhhGID9StejIoS4sb706gQuR3xXw/edit"},
+    {nome:"LISTA DE HUS 1.0",url:"https://tms.adminml.com/fos-assembly-reports/hu-list/sales"}
+];
 
-        function setStatus(texto, tipo = "syncing") {
-            const status = document.getElementById("statusSync");
-            status.className = `status ${tipo}`;
-            status.textContent = texto;
-        }
+let dragSrc=null;
 
-        function getLinksLocais() {
-            try {
-                const dados = JSON.parse(localStorage.getItem(LOCAL_KEY));
-                return Array.isArray(dados) && dados.length ? dados : [...linksPadrao];
-            } catch {
-                return [...linksPadrao];
-            }
-        }
+function initTheme(){applyTheme(localStorage.getItem(THEME_KEY)||'light');}
+function applyTheme(t){
+    document.body.classList.toggle('dark',t==='dark');
+    const btn=document.getElementById('btnTheme');
+    if(btn)btn.textContent=t==='dark'?'☀️ Claro':'🌙 Escuro';
+    localStorage.setItem(THEME_KEY,t);
+}
+function toggleTheme(){applyTheme(document.body.classList.contains('dark')?'light':'dark');}
 
-        function salvarLinksLocais(links) {
-            localStorage.setItem(LOCAL_KEY, JSON.stringify(links));
-        }
+function setStatus(texto,tipo="syncing"){
+    const s=document.getElementById("statusSync");
+    s.className=`status ${tipo}`;s.textContent=texto;
+}
+function getLinksLocais(){
+    try{const d=JSON.parse(localStorage.getItem(LOCAL_KEY));return Array.isArray(d)&&d.length?d:[...linksPadrao];}
+    catch{return[...linksPadrao];}
+}
+function salvarLinksLocais(l){localStorage.setItem(LOCAL_KEY,JSON.stringify(l));}
+function normalizarUrl(u){
+    let r=u.trim();if(!/^https?:\/\//i.test(r))r="https://"+r;
+    try{return new URL(r).href;}catch{return null;}
+}
+function removerDuplicados(lista){
+    const m=new Map();
+    lista.forEach(item=>{
+        if(!item?.nome||!item?.url)return;
+        const k=`${item.nome.trim().toLowerCase()}|${item.url.trim().toLowerCase()}`;
+        if(!m.has(k))m.set(k,{nome:item.nome.trim(),url:item.url.trim()});
+    });
+    return Array.from(m.values());
+}
 
-        function normalizarUrl(url) {
-            let urlFinal = url.trim();
-            if (!/^https?:\/\//i.test(urlFinal)) {
-                urlFinal = "https://" + urlFinal;
-            }
+function renderizarLinks(links){
+    const lista=document.getElementById("listaLinks");
+    lista.innerHTML="";
+    links.forEach((link,idx)=>{
+        const li=document.createElement("li");
+        li.className="link-item";li.draggable=true;li.dataset.idx=idx;
 
-            try {
-                return new URL(urlFinal).href;
-            } catch {
-                return null;
-            }
-        }
-
-        function removerDuplicados(lista) {
-            const mapa = new Map();
-
-            lista.forEach(item => {
-                if (!item?.nome || !item?.url) return;
-                const chave = `${item.nome.trim().toLowerCase()}|${item.url.trim().toLowerCase()}`;
-                if (!mapa.has(chave)) {
-                    mapa.set(chave, {
-                        nome: item.nome.trim(),
-                        url: item.url.trim()
-                    });
-                }
-            });
-
-            return Array.from(mapa.values());
-        }
-
-        function renderizarLinks(links) {
-            const lista = document.getElementById("listaLinks");
-            lista.innerHTML = "";
-
-            links.forEach(link => {
-                const li = document.createElement("li");
-                const a = document.createElement("a");
-                const spanNome = document.createElement("span");
-                const spanSeta = document.createElement("span");
-
-                a.href = link.url;
-                a.className = "link-card";
-                a.target = "_blank";
-                a.rel = "noopener noreferrer";
-
-                spanNome.textContent = link.nome;
-                spanSeta.textContent = "→";
-
-                a.appendChild(spanNome);
-                a.appendChild(spanSeta);
-                li.appendChild(a);
-                lista.appendChild(li);
-            });
-        }
-
-        async function buscarLinksNuvem() {
-            const resposta = await fetch(`${FIREBASE_URL}${FIREBASE_PATH}?t=${Date.now()}`, {
-                method: "GET",
-                headers: {
-                    "Accept": "application/json"
-                }
-            });
-
-            if (!resposta.ok) {
-                throw new Error("Falha ao buscar dados do Firebase.");
-            }
-
-            return await resposta.json();
-        }
-
-        async function salvarLinksNuvem(links) {
-            const resposta = await fetch(`${FIREBASE_URL}${FIREBASE_PATH}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(links)
-            });
-
-            if (!resposta.ok) {
-                throw new Error("Falha ao salvar dados no Firebase.");
-            }
-
-            return await resposta.json();
-        }
-
-        async function carregarLinks() {
-            // 1) Exibe cache local instantaneamente
-            const linksLocais = getLinksLocais();
-            renderizarLinks(linksLocais);
-
-            // 2) Busca Firebase sempre como fonte de verdade
-            setStatus("Consultando backup na nuvem...", "syncing");
-
-            if (!navigator.onLine) {
-                setStatus("Sem internet. Exibindo dados locais.", "offline");
-                return;
-            }
-
-            try {
-                const linksNuvem = await buscarLinksNuvem();
-
-                // 3) Se Firebase tiver dados, usa eles e atualiza o cache local
-                if (Array.isArray(linksNuvem) && linksNuvem.length > 0) {
-                    const listaFinal = removerDuplicados(linksNuvem);
-                    salvarLinksLocais(listaFinal);
-                    renderizarLinks(listaFinal);
-                    setStatus("Dados carregados da nuvem com sucesso.", "online");
-                    return;
-                }
-
-                // 4) Se Firebase estiver vazio, sobe os dados locais/padrão
-                const baseInicial = removerDuplicados(linksLocais.length ? linksLocais : linksPadrao);
-                await salvarLinksNuvem(baseInicial);
-                salvarLinksLocais(baseInicial);
-                renderizarLinks(baseInicial);
-                setStatus("Firebase vazio. Dados locais/padrão enviados para a nuvem.", "warning");
-
-            } catch (erro) {
-                console.error(erro);
-                // 5) Se Firebase offline, mantém modo local com aviso visual
-                setStatus("Firebase indisponível. Modo local ativo.", "offline");
-            }
-        }
-
-        async function adicionarLink() {
-            const botao = document.getElementById("btnSalvar");
-            const nomeInput = document.getElementById("nomeLink");
-            const urlInput = document.getElementById("urlLink");
-
-            const nome = nomeInput.value.trim();
-            const urlNormalizada = normalizarUrl(urlInput.value);
-
-            if (!nome || !urlInput.value.trim()) {
-                alert("Preencha ambos os campos!");
-                return;
-            }
-
-            if (!urlNormalizada) {
-                alert("Digite uma URL válida.");
-                return;
-            }
-
-            const linksAtuais = getLinksLocais();
-            const linksAtualizados = removerDuplicados([
-                ...linksAtuais,
-                { nome, url: urlNormalizada }
-            ]);
-
-            botao.disabled = true;
-            setStatus("Salvando link... priorizando backup na nuvem.", "syncing");
-
-            try {
-                // Prioriza primeiro a nuvem
-                if (!navigator.onLine) {
-                    throw new Error("Sem conexão.");
-                }
-
-                await salvarLinksNuvem(linksAtualizados);
-                salvarLinksLocais(linksAtualizados);
-                renderizarLinks(linksAtualizados);
-
-                nomeInput.value = "";
-                urlInput.value = "";
-                setStatus("Link salvo na nuvem e sincronizado localmente.", "online");
-
-            } catch (erro) {
-                console.error(erro);
-
-                // Fallback local com aviso visual
-                salvarLinksLocais(linksAtualizados);
-                renderizarLinks(linksAtualizados);
-
-                nomeInput.value = "";
-                urlInput.value = "";
-                setStatus("Sem acesso ao Firebase. Link salvo apenas no modo local.", "offline");
-            } finally {
-                botao.disabled = false;
-            }
-        }
-
-        async function resetarLinks() {
-            const confirmar = confirm("Deseja restaurar a lista original e apagar os que você adicionou?");
-            if (!confirmar) return;
-
-            setStatus("Restaurando lista padrão...", "syncing");
-
-            try {
-                if (!navigator.onLine) {
-                    throw new Error("Sem conexão.");
-                }
-
-                await salvarLinksNuvem(linksPadrao);
-                salvarLinksLocais(linksPadrao);
-                renderizarLinks(linksPadrao);
-                setStatus("Lista padrão restaurada e sincronizada com a nuvem.", "online");
-
-            } catch (erro) {
-                console.error(erro);
-                salvarLinksLocais(linksPadrao);
-                renderizarLinks(linksPadrao);
-                setStatus("Firebase indisponível. Lista padrão restaurada apenas localmente.", "offline");
-            }
-        }
-
-        window.addEventListener("online", () => {
-            setStatus("Conexão restabelecida. Sincronizando com a nuvem...", "syncing");
-            carregarLinks();
+        li.addEventListener('dragstart',e=>{dragSrc=idx;e.dataTransfer.effectAllowed='move';setTimeout(()=>li.style.opacity='.45',0);});
+        li.addEventListener('dragend',()=>{li.style.opacity='';document.querySelectorAll('.link-item').forEach(x=>x.classList.remove('drag-over'));});
+        li.addEventListener('dragover',e=>{e.preventDefault();li.classList.add('drag-over');});
+        li.addEventListener('dragleave',()=>li.classList.remove('drag-over'));
+        li.addEventListener('drop',e=>{
+            e.preventDefault();li.classList.remove('drag-over');
+            if(dragSrc===null||dragSrc===idx)return;
+            const arr=getLinksLocais();const[moved]=arr.splice(dragSrc,1);arr.splice(idx,0,moved);
+            salvarLinksLocais(arr);renderizarLinks(arr);sincronizarNuvem(arr);dragSrc=null;
         });
 
-        window.addEventListener("offline", () => {
-            setStatus("Você está offline. Modo local ativo.", "offline");
-        });
+        const handle=document.createElement('span');
+        handle.className='drag-handle';handle.title='Arrastar para reordenar';handle.textContent='⠿';
 
-        window.onload = carregarLinks;
-    </script>
+        const body=document.createElement('div');body.className='link-body';
+        const linkRow=document.createElement('div');linkRow.className='link-row';
+
+        const a=document.createElement('a');
+        a.href=link.url;a.className='link-card';a.target='_blank';a.rel='noopener noreferrer';
+        const sn=document.createElement('span');sn.textContent=link.nome;
+        const ss=document.createElement('span');ss.textContent='→';
+        a.appendChild(sn);a.appendChild(ss);
+
+        const actions=document.createElement('div');actions.className='link-actions';
+
+        const btnEdit=document.createElement('button');
+        btnEdit.className='action-btn edit';btnEdit.title='Editar';btnEdit.textContent='editar';
+        btnEdit.onclick=()=>{
+            const row=body.querySelector('.edit-row');row.classList.toggle('open');
+            if(row.classList.contains('open')){row.querySelector('.edit-nome').value=link.nome;row.querySelector('.edit-url').value=link.url;}
+        };
+
+        const btnDel=document.createElement('button');
+        btnDel.className='action-btn del';btnDel.title='Excluir';btnDel.textContent='excluir';
+        btnDel.onclick=()=>{
+            if(!confirm(`Excluir "${link.nome}"?`))return;
+            const arr=getLinksLocais();arr.splice(idx,1);
+            salvarLinksLocais(arr);renderizarLinks(arr);sincronizarNuvem(arr);
+        };
+
+        actions.appendChild(btnEdit);actions.appendChild(btnDel);
+        linkRow.appendChild(a);linkRow.appendChild(actions);
+
+        const editRow=document.createElement('div');editRow.className='edit-row';
+        const eNome=document.createElement('input');eNome.className='edit-nome';eNome.placeholder='Nome';
+        const eUrl=document.createElement('input');eUrl.className='edit-url';eUrl.placeholder='URL';
+        const eSave=document.createElement('button');eSave.className='edit-save';eSave.textContent='salvar';
+        eSave.onclick=()=>{
+            const nn=eNome.value.trim();const nu=normalizarUrl(eUrl.value);
+            if(!nn||!nu){alert('Preencha os dois campos.');return;}
+            const arr=getLinksLocais();arr[idx]={nome:nn,url:nu};
+            salvarLinksLocais(arr);renderizarLinks(arr);sincronizarNuvem(arr);
+        };
+        const eCancel=document.createElement('button');eCancel.className='edit-cancel';eCancel.textContent='cancelar';
+        eCancel.onclick=()=>editRow.classList.remove('open');
+        editRow.appendChild(eNome);editRow.appendChild(eUrl);editRow.appendChild(eSave);editRow.appendChild(eCancel);
+
+        body.appendChild(linkRow);body.appendChild(editRow);
+        li.appendChild(handle);li.appendChild(body);
+        lista.appendChild(li);
+    });
+}
+
+async function buscarLinksNuvem(){
+    const r=await fetch(`${FIREBASE_URL}${FIREBASE_PATH}?t=${Date.now()}`,{method:"GET",headers:{"Accept":"application/json"}});
+    if(!r.ok)throw new Error("Falha ao buscar dados do Firebase.");
+    return await r.json();
+}
+async function salvarLinksNuvem(links){
+    const r=await fetch(`${FIREBASE_URL}${FIREBASE_PATH}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(links)});
+    if(!r.ok)throw new Error("Falha ao salvar dados no Firebase.");
+    return await r.json();
+}
+async function sincronizarNuvem(links){
+    if(!navigator.onLine)return;try{await salvarLinksNuvem(links);}catch{}
+}
+
+async function carregarLinks(){
+    const linksLocais=getLinksLocais();renderizarLinks(linksLocais);
+    setStatus("Consultando backup na nuvem...","syncing");
+    if(!navigator.onLine){setStatus("Sem internet. Exibindo dados locais.","offline");return;}
+    try{
+        const linksNuvem=await buscarLinksNuvem();
+        if(Array.isArray(linksNuvem)&&linksNuvem.length>0){
+            const listaFinal=removerDuplicados(linksNuvem);
+            salvarLinksLocais(listaFinal);renderizarLinks(listaFinal);
+            setStatus("Dados carregados da nuvem com sucesso.","online");return;
+        }
+        const baseInicial=removerDuplicados(linksLocais.length?linksLocais:linksPadrao);
+        await salvarLinksNuvem(baseInicial);salvarLinksLocais(baseInicial);renderizarLinks(baseInicial);
+        setStatus("Firebase vazio. Dados locais/padrão enviados para a nuvem.","warning");
+    }catch(erro){console.error(erro);setStatus("Firebase indisponível. Modo local ativo.","offline");}
+}
+
+async function adicionarLink(){
+    const botao=document.getElementById("btnSalvar");
+    const nomeInput=document.getElementById("nomeLink");
+    const urlInput=document.getElementById("urlLink");
+    const nome=nomeInput.value.trim();
+    const urlNormalizada=normalizarUrl(urlInput.value);
+    if(!nome||!urlInput.value.trim()){alert("Preencha ambos os campos!");return;}
+    if(!urlNormalizada){alert("Digite uma URL válida.");return;}
+    const linksAtualizados=removerDuplicados([...getLinksLocais(),{nome,url:urlNormalizada}]);
+    botao.disabled=true;setStatus("Salvando link... priorizando backup na nuvem.","syncing");
+    try{
+        if(!navigator.onLine)throw new Error("Sem conexão.");
+        await salvarLinksNuvem(linksAtualizados);salvarLinksLocais(linksAtualizados);renderizarLinks(linksAtualizados);
+        nomeInput.value="";urlInput.value="";setStatus("Link salvo na nuvem e sincronizado localmente.","online");
+    }catch(erro){
+        console.error(erro);salvarLinksLocais(linksAtualizados);renderizarLinks(linksAtualizados);
+        nomeInput.value="";urlInput.value="";setStatus("Sem acesso ao Firebase. Link salvo apenas no modo local.","offline");
+    }finally{botao.disabled=false;}
+}
+
+async function resetarLinks(){
+    if(!confirm("Deseja restaurar a lista original e apagar os que você adicionou?"))return;
+    setStatus("Restaurando lista padrão...","syncing");
+    try{
+        if(!navigator.onLine)throw new Error("Sem conexão.");
+        await salvarLinksNuvem(linksPadrao);salvarLinksLocais(linksPadrao);renderizarLinks(linksPadrao);
+        setStatus("Lista padrão restaurada e sincronizada com a nuvem.","online");
+    }catch(erro){
+        console.error(erro);salvarLinksLocais(linksPadrao);renderizarLinks(linksPadrao);
+        setStatus("Firebase indisponível. Lista padrão restaurada apenas localmente.","offline");
+    }
+}
+
+window.addEventListener("online",()=>{setStatus("Conexão restabelecida. Sincronizando com a nuvem...","syncing");carregarLinks();});
+window.addEventListener("offline",()=>setStatus("Você está offline. Modo local ativo.","offline"));
+
+initTheme();
+window.onload=carregarLinks;
+</script>
 </body>
 </html>
