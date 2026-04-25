@@ -64,6 +64,18 @@
         .edit-save { background:var(--accent);color:#fff;border:none;border-radius:5px;padding:7px 12px;font-size:12px;font-weight:500;cursor:pointer; }
         .edit-cancel { background:none;border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:7px 10px;font-size:12px;cursor:pointer; }
         .btn-reset { margin-top:20px;background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:12px;display:block;margin-left:auto;margin-right:auto; }
+
+        /* Search */
+        .btn-search { background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:15px;transition:all .15s;line-height:1; }
+        .btn-search:hover { border-color:var(--accent);color:var(--accent); }
+        .search-bar { display:none;align-items:center;gap:8px;margin-bottom:14px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;transition:all .2s; }
+        .search-bar.open { display:flex; }
+        .search-bar input { flex:1;border:none;background:transparent;font-size:14px;color:var(--text);outline:none;padding:2px 0; }
+        .search-bar input::placeholder { color:var(--muted); }
+        .search-clear { background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 2px;line-height:1;transition:color .15s; }
+        .search-clear:hover { color:var(--text); }
+        .no-results { text-align:center;color:var(--muted);font-size:14px;padding:24px 0; }
+
         @media(max-width:640px){.form-group{grid-template-columns:1fr}.btn-add{width:100%}.link-actions{opacity:1}}
     </style>
 </head>
@@ -71,13 +83,21 @@
 <div class="container">
     <div class="header">
         <h2>Painel de Links</h2>
-        <button class="btn-theme" id="btnTheme" onclick="toggleTheme()">🌙 Escuro</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn-search" id="btnSearch" title="Pesquisar" onclick="toggleSearch()">🔍</button>
+            <button class="btn-theme" id="btnTheme" onclick="toggleTheme()">🌙 Escuro</button>
+        </div>
     </div>
     <div id="statusSync" class="status syncing">Iniciando sincronização...</div>
     <div class="form-group">
         <input type="text" id="nomeLink" placeholder="Nome (Ex: FOS)">
         <input type="text" id="urlLink" placeholder="URL (Link completo)">
         <button class="btn-add" id="btnSalvar" onclick="adicionarLink()">Salvar</button>
+    </div>
+    <div class="search-bar" id="searchBar">
+        <span style="color:var(--muted);font-size:15px;">🔍</span>
+        <input type="text" id="searchInput" placeholder="Pesquisar título..." oninput="filtrarLinks()" autocomplete="off">
+        <button class="search-clear" title="Fechar pesquisa" onclick="fecharSearch()">✕</button>
     </div>
     <ul id="listaLinks"></ul>
     <button class="btn-reset" onclick="resetarLinks()">Restaurar lista padrão</button>
@@ -283,6 +303,34 @@ async function resetarLinks(){
 
 window.addEventListener("online",()=>{setStatus("Conexão restabelecida. Sincronizando com a nuvem...","syncing");carregarLinks();});
 window.addEventListener("offline",()=>setStatus("Você está offline. Modo local ativo.","offline"));
+
+function toggleSearch(){
+    const bar=document.getElementById('searchBar');
+    const input=document.getElementById('searchInput');
+    bar.classList.toggle('open');
+    if(bar.classList.contains('open')){input.focus();}
+    else{input.value='';filtrarLinks();}
+}
+function fecharSearch(){
+    document.getElementById('searchBar').classList.remove('open');
+    document.getElementById('searchInput').value='';
+    filtrarLinks();
+}
+function filtrarLinks(){
+    const q=document.getElementById('searchInput').value.trim().toLowerCase();
+    const items=document.querySelectorAll('#listaLinks .link-item');
+    let visiveis=0;
+    items.forEach(li=>{
+        const nome=li.querySelector('.link-card span:first-child')?.textContent.toLowerCase()||'';
+        const show=!q||nome.includes(q);
+        li.style.display=show?'':'none';
+        if(show)visiveis++;
+    });
+    let noResult=document.getElementById('noResults');
+    if(!noResult){noResult=document.createElement('p');noResult.id='noResults';noResult.className='no-results';document.getElementById('listaLinks').after(noResult);}
+    noResult.style.display=(q&&visiveis===0)?'block':'none';
+    noResult.textContent='Nenhum resultado para "'+document.getElementById('searchInput').value.trim()+'"';
+}
 
 initTheme();
 window.onload=carregarLinks;
